@@ -1,0 +1,47 @@
+name: Issue Classifier and Updater
+
+on:
+  issues:
+    types: [opened, edited, reopened]
+
+permissions:
+  issues: write
+  contents: read
+
+env:
+  BUILD_BUILDID: ${{ github.run_id }}
+  PYTHON_VERSION: "3.9"
+  AZURE_OPENAI_API_TYPE: ${{ secrets.AZURE_OPENAI_API_TYPE }}
+  AZURE_OPENAI_KEY: ${{ secrets.AZURE_OPENAI_KEY }}
+  AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+  AZURE_OPENAI_API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
+  AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
+
+
+jobs:
+  classify_and_update_issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run issue_classifier
+        run: |
+          python issue_classifier.py --issue_content "${{ github.event.issue.body }}"  \
+          
+        #   --issue_number ${{ github.event.issue.number }} \n
+        #   --repo "${{ github.repository }}" \n
+        #   --org "${{ github.repository_owner }}"
+
+    #   - name: Run issue_updater
+    #     run: |
+    #       python issue_updater.py --issue_number ${{ github.event.issue.number }}
