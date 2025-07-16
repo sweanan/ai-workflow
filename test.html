@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Opponent Tests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .pass {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .fail {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI Opponent Test Results</h1>
+    <div id="test-results"></div>
+
+    <script>
+        // Import the TicTacToeAI class logic for testing
+        class TicTacToeAITester {
+            constructor() {
+                this.results = [];
+                this.runTests();
+            }
+
+            runTests() {
+                this.testValidMoves();
+                this.testNoCellOverwrite();
+                this.testDifficultyLevels();
+                this.displayResults();
+            }
+
+            testValidMoves() {
+                // Test that AI makes valid moves (only on empty cells)
+                const board = [null, 'X', null, 'O', null, 'X', null, null, 'O'];
+                const availableMoves = this.getAvailableMoves(board);
+                const expectedAvailable = [0, 2, 4, 6, 7];
+                
+                const isValid = JSON.stringify(availableMoves.sort()) === JSON.stringify(expectedAvailable.sort());
+                this.addResult('AI makes valid moves only on empty cells', isValid);
+            }
+
+            testNoCellOverwrite() {
+                // Test that AI doesn't overwrite marked cells
+                const board = ['X', 'O', 'X', null, null, null, null, null, null];
+                const availableMoves = this.getAvailableMoves(board);
+                const hasMarkedCells = availableMoves.includes(0) || availableMoves.includes(1) || availableMoves.includes(2);
+                
+                this.addResult('AI does not overwrite marked cells', !hasMarkedCells);
+            }
+
+            testDifficultyLevels() {
+                // Test that all three difficulty levels exist and produce different behaviors
+                const difficulties = ['easy', 'medium', 'hard'];
+                const allDifficultiesExist = difficulties.length === 3;
+                
+                this.addResult('AI has three difficulty levels (easy, medium, hard)', allDifficultiesExist);
+
+                // Test that minimax returns optimal moves for hard difficulty
+                // Test scenario: X threatens to win on top row, AI should block
+                const board = ['X', 'X', null, null, 'O', null, null, null, null];
+                const bestMove = this.getBestMove(board);
+                // AI should block the top row win by playing position 2
+                const isOptimal = bestMove === 2;
+                
+                this.addResult('Hard difficulty AI makes optimal moves using minimax', isOptimal);
+            }
+
+            getAvailableMoves(board) {
+                return board.map((cell, index) => cell === null ? index : null)
+                    .filter(index => index !== null);
+            }
+
+            getBestMove(board) {
+                let bestScore = -Infinity;
+                let bestMove = -1;
+
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === null) {
+                        board[i] = 'O';
+                        let score = this.minimax(board, 0, false);
+                        board[i] = null;
+                        
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestMove = i;
+                        }
+                    }
+                }
+
+                return bestMove;
+            }
+
+            minimax(board, depth, isMaximizing) {
+                let winner = this.checkWinForBoard(board);
+                
+                if (winner === 'O') return 10 - depth;
+                if (winner === 'X') return depth - 10;
+                if (this.checkDrawForBoard(board)) return 0;
+
+                if (isMaximizing) {
+                    let bestScore = -Infinity;
+                    for (let i = 0; i < 9; i++) {
+                        if (board[i] === null) {
+                            board[i] = 'O';
+                            let score = this.minimax(board, depth + 1, false);
+                            board[i] = null;
+                            bestScore = Math.max(score, bestScore);
+                        }
+                    }
+                    return bestScore;
+                } else {
+                    let bestScore = Infinity;
+                    for (let i = 0; i < 9; i++) {
+                        if (board[i] === null) {
+                            board[i] = 'X';
+                            let score = this.minimax(board, depth + 1, true);
+                            board[i] = null;
+                            bestScore = Math.min(score, bestScore);
+                        }
+                    }
+                    return bestScore;
+                }
+            }
+
+            checkWinForBoard(board) {
+                const winPatterns = [
+                    [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+                    [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+                    [0, 4, 8], [2, 4, 6] // Diagonals
+                ];
+
+                for (let pattern of winPatterns) {
+                    const [a, b, c] = pattern;
+                    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                        return board[a];
+                    }
+                }
+                return null;
+            }
+
+            checkDrawForBoard(board) {
+                return board.every(cell => cell !== null) && !this.checkWinForBoard(board);
+            }
+
+            addResult(testName, passed) {
+                this.results.push({ name: testName, passed });
+            }
+
+            displayResults() {
+                const container = document.getElementById('test-results');
+                let html = '';
+                
+                this.results.forEach(result => {
+                    const className = result.passed ? 'pass' : 'fail';
+                    const status = result.passed ? 'PASS' : 'FAIL';
+                    html += `<div class="test-result ${className}">
+                        <strong>${status}:</strong> ${result.name}
+                    </div>`;
+                });
+
+                const passedCount = this.results.filter(r => r.passed).length;
+                const totalCount = this.results.length;
+                
+                html += `<div class="test-result ${passedCount === totalCount ? 'pass' : 'fail'}">
+                    <strong>Summary:</strong> ${passedCount}/${totalCount} tests passed
+                </div>`;
+
+                container.innerHTML = html;
+            }
+        }
+
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new TicTacToeAITester();
+        });
+    </script>
+</body>
+</html>

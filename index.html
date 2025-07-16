@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe with AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        select, button {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            margin: 20px auto;
+            border: 3px solid #333;
+            border-radius: 10px;
+            padding: 10px;
+            background-color: #333;
+        }
+
+        .cell {
+            background-color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 2em;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .cell:hover {
+            background-color: #f8f9fa;
+        }
+
+        .cell:disabled {
+            cursor: not-allowed;
+            background-color: #e9ecef;
+        }
+
+        .game-status {
+            text-align: center;
+            font-size: 1.2em;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .player-x {
+            color: #dc3545;
+        }
+
+        .player-o {
+            color: #007bff;
+        }
+
+        .winner {
+            color: #28a745;
+        }
+
+        .draw {
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Tic-Tac-Toe with AI</h1>
+        
+        <div class="controls">
+            <div class="difficulty-selector">
+                <label for="difficulty">AI Difficulty:</label>
+                <select id="difficulty">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
+            <button id="restart-btn">Restart Game</button>
+        </div>
+
+        <div class="game-status" id="game-status">Your turn (X)</div>
+        
+        <div class="game-board" id="game-board">
+            <button class="cell" data-index="0"></button>
+            <button class="cell" data-index="1"></button>
+            <button class="cell" data-index="2"></button>
+            <button class="cell" data-index="3"></button>
+            <button class="cell" data-index="4"></button>
+            <button class="cell" data-index="5"></button>
+            <button class="cell" data-index="6"></button>
+            <button class="cell" data-index="7"></button>
+            <button class="cell" data-index="8"></button>
+        </div>
+    </div>
+
+    <script>
+        class TicTacToeAI {
+            constructor() {
+                this.board = Array(9).fill(null);
+                this.currentPlayer = 'X'; // Human is X, AI is O
+                this.gameOver = false;
+                this.difficulty = 'easy';
+                
+                this.cells = document.querySelectorAll('.cell');
+                this.statusElement = document.getElementById('game-status');
+                this.restartBtn = document.getElementById('restart-btn');
+                this.difficultySelect = document.getElementById('difficulty');
+                
+                this.initializeGame();
+            }
+
+            initializeGame() {
+                this.cells.forEach((cell, index) => {
+                    cell.addEventListener('click', () => this.makeMove(index));
+                });
+                
+                this.restartBtn.addEventListener('click', () => this.restartGame());
+                this.difficultySelect.addEventListener('change', (e) => {
+                    this.difficulty = e.target.value;
+                });
+                
+                this.updateStatus();
+            }
+
+            makeMove(index) {
+                if (this.board[index] || this.gameOver || this.currentPlayer === 'O') {
+                    return;
+                }
+
+                this.board[index] = this.currentPlayer;
+                this.cells[index].textContent = this.currentPlayer;
+                this.cells[index].classList.add(`player-${this.currentPlayer.toLowerCase()}`);
+                this.cells[index].disabled = true;
+
+                if (this.checkWin()) {
+                    this.gameOver = true;
+                    this.statusElement.textContent = `You win!`;
+                    this.statusElement.classList.add('winner');
+                    this.disableAllCells();
+                    return;
+                }
+
+                if (this.checkDraw()) {
+                    this.gameOver = true;
+                    this.statusElement.textContent = 'Draw!';
+                    this.statusElement.classList.add('draw');
+                    return;
+                }
+
+                this.currentPlayer = 'O';
+                this.updateStatus();
+                
+                // AI makes its move after a short delay
+                setTimeout(() => this.makeAIMove(), 500);
+            }
+
+            makeAIMove() {
+                if (this.gameOver) return;
+
+                let moveIndex;
+                switch (this.difficulty) {
+                    case 'easy':
+                        moveIndex = this.getRandomMove();
+                        break;
+                    case 'medium':
+                        moveIndex = this.getMediumMove();
+                        break;
+                    case 'hard':
+                        moveIndex = this.getBestMove();
+                        break;
+                }
+
+                if (moveIndex !== -1) {
+                    this.board[moveIndex] = 'O';
+                    this.cells[moveIndex].textContent = 'O';
+                    this.cells[moveIndex].classList.add('player-o');
+                    this.cells[moveIndex].disabled = true;
+
+                    if (this.checkWin()) {
+                        this.gameOver = true;
+                        this.statusElement.textContent = 'AI wins!';
+                        this.statusElement.classList.add('winner');
+                        this.disableAllCells();
+                        return;
+                    }
+
+                    if (this.checkDraw()) {
+                        this.gameOver = true;
+                        this.statusElement.textContent = 'Draw!';
+                        this.statusElement.classList.add('draw');
+                        return;
+                    }
+
+                    this.currentPlayer = 'X';
+                    this.updateStatus();
+                }
+            }
+
+            getRandomMove() {
+                const availableMoves = this.getAvailableMoves();
+                if (availableMoves.length === 0) return -1;
+                return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+            }
+
+            getMediumMove() {
+                // 50% chance to make a strategic move, 50% random
+                if (Math.random() < 0.5) {
+                    return this.getBestMove();
+                } else {
+                    return this.getRandomMove();
+                }
+            }
+
+            getBestMove() {
+                let bestScore = -Infinity;
+                let bestMove = -1;
+
+                for (let i = 0; i < 9; i++) {
+                    if (this.board[i] === null) {
+                        this.board[i] = 'O';
+                        let score = this.minimax(this.board, 0, false);
+                        this.board[i] = null;
+                        
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestMove = i;
+                        }
+                    }
+                }
+
+                return bestMove;
+            }
+
+            minimax(board, depth, isMaximizing) {
+                let winner = this.checkWinForBoard(board);
+                
+                if (winner === 'O') return 10 - depth;
+                if (winner === 'X') return depth - 10;
+                if (this.checkDrawForBoard(board)) return 0;
+
+                if (isMaximizing) {
+                    let bestScore = -Infinity;
+                    for (let i = 0; i < 9; i++) {
+                        if (board[i] === null) {
+                            board[i] = 'O';
+                            let score = this.minimax(board, depth + 1, false);
+                            board[i] = null;
+                            bestScore = Math.max(score, bestScore);
+                        }
+                    }
+                    return bestScore;
+                } else {
+                    let bestScore = Infinity;
+                    for (let i = 0; i < 9; i++) {
+                        if (board[i] === null) {
+                            board[i] = 'X';
+                            let score = this.minimax(board, depth + 1, true);
+                            board[i] = null;
+                            bestScore = Math.min(score, bestScore);
+                        }
+                    }
+                    return bestScore;
+                }
+            }
+
+            getAvailableMoves() {
+                return this.board.map((cell, index) => cell === null ? index : null)
+                    .filter(index => index !== null);
+            }
+
+            checkWin() {
+                return this.checkWinForBoard(this.board);
+            }
+
+            checkWinForBoard(board) {
+                const winPatterns = [
+                    [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+                    [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+                    [0, 4, 8], [2, 4, 6] // Diagonals
+                ];
+
+                for (let pattern of winPatterns) {
+                    const [a, b, c] = pattern;
+                    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                        return board[a];
+                    }
+                }
+                return null;
+            }
+
+            checkDraw() {
+                return this.checkDrawForBoard(this.board);
+            }
+
+            checkDrawForBoard(board) {
+                return board.every(cell => cell !== null) && !this.checkWinForBoard(board);
+            }
+
+            updateStatus() {
+                if (!this.gameOver) {
+                    if (this.currentPlayer === 'X') {
+                        this.statusElement.textContent = 'Your turn (X)';
+                    } else {
+                        this.statusElement.textContent = 'AI thinking... (O)';
+                    }
+                }
+            }
+
+            disableAllCells() {
+                this.cells.forEach(cell => {
+                    cell.disabled = true;
+                });
+            }
+
+            restartGame() {
+                this.board = Array(9).fill(null);
+                this.currentPlayer = 'X';
+                this.gameOver = false;
+                
+                this.cells.forEach(cell => {
+                    cell.textContent = '';
+                    cell.disabled = false;
+                    cell.classList.remove('player-x', 'player-o');
+                });
+                
+                this.statusElement.textContent = 'Your turn (X)';
+                this.statusElement.classList.remove('winner', 'draw');
+            }
+        }
+
+        // Initialize the game when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new TicTacToeAI();
+        });
+    </script>
+</body>
+</html>
