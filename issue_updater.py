@@ -24,7 +24,7 @@ def update_githubitem(workitem_id, org, repo, url, classification):
         raise ValueError("Invalid work item data. Missing issue number or repository URL.")
 
     # Construct the API URL
-    url = f"https://api.github.com/repos/{repo}/issues/{workitem_id}"
+    # url = f"https://api.github.com/repos/{repo}/issues/{workitem_id}"
 
     # Prepare the payload
     payload = {
