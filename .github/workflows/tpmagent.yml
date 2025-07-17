@@ -42,6 +42,7 @@ jobs:
           --issue_number ${{ github.event.issue.number }} \
           --repo "${{ github.repository }}" \
           --org "${{ github.repository_owner }}")
+          echo "classificationResult=$classificationResult" >> "$GITHUB_OUTPUT"
 
         #   echo "classificationResult=$classificationResult" >> "$GITHUB_OUTPUT"
 
