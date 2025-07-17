@@ -73,10 +73,11 @@ def classify_workitem(work_item):
 
     try:
         parsed_result = json.loads(result)
+        classification = parsed_result.get("classification", "Unknown")
     except json.JSONDecodeError:
         raise ValueError(f"❌ Model returned non-JSON: {result}")
 
-    return parsed_result, parsed_result.get("classification", "Unknown")
+    return parsed_result, classification
 
 
 def parse_args() -> argparse.Namespace:
@@ -116,7 +117,8 @@ def parse_args() -> argparse.Namespace:
 if __name__ == "__main__":
     args = parse_args()
 
-    parsed_result, reply  = classify_workitem(args.issue_content)
-
-    print("Classification:", parsed_result.get("classification", "Unknown"))
-    print("Reply:", reply)
+    parsed_result, classificationResult = classify_workitem(args.issue_content)
+    print("completed classification")
+    print(parsed_result, classificationResult)
+    # print("Classification:", parsed_result.get("classification", "Unknown"))
+    # print("Reply:", reply)
