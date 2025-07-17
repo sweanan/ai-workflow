@@ -1,5 +1,4 @@
 from unittest import result
-# import yaml
 import openai
 from dotenv import load_dotenv
 import os
@@ -7,18 +6,6 @@ import utils
 import json
 import argparse
 
-# def load_config(config_path):
-#     """
-#     Load configuration variables from a YAML file.
-
-#     Args:
-#         config_path (str): Path to the YAML configuration file.
-
-#     Returns:
-#         dict: Configuration variables.
-#     """
-#     with open(config_path, 'r') as file:
-#         return yaml.safe_load(file)
 
 def classify_workitem(work_item):
     """
@@ -31,15 +18,8 @@ def classify_workitem(work_item):
         str: Classification result (e.g., 'Bug' or 'Not a Bug').
     """
     # Load configuration
-    #config = load_config("model_config.yaml")
-    # openai.api_key = config["openai_api_key"]
     load_dotenv()
     
-    # openai.api_type = "azure"
-    # openai.api_key = os.environ["AZURE_OPENAI_KEY"]
-    # openai.api_base = os.environ["AZURE_OPENAI_ENDPOINT"]
-    # openai.api_version = os.environ["AZURE_OPENAI_API_VERSION"]
-    # deployment_name = os.environ["AZURE_OPENAI_DEPLOYMENT"]
     openai.api_type = os.getenv("AZURE_OPENAI_API_TYPE", "azure")
     openai.api_key = os.getenv("AZURE_OPENAI_KEY")
     openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
@@ -96,22 +76,7 @@ def classify_workitem(work_item):
     except json.JSONDecodeError:
         raise ValueError(f"❌ Model returned non-JSON: {result}")
 
-    return parsed_result, reply
-
-
-# Uncomment this if you want to run the script directly for testing
-# This is useful for debugging or local testing without the full application context.
-# if __name__ == "__main__":
-#     workitem_id = 13
-#     org = "sweanan"
-#     repo = "ai-workflow"
-#     from load_github import load_github_workitem
-#     workitem = load_github_workitem(workitem_id, org, repo)
-
-#     parsed_result, reply  = classify_workitem(workitem)
-
-#     print("Classification:", parsed_result.get("classification", "Unknown"))
-#     print("Reply:", reply)
+    return parsed_result, parsed_result.get("classification", "Unknown")
 
 
 def parse_args() -> argparse.Namespace:

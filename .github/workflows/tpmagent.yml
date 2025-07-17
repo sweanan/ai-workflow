@@ -36,24 +36,24 @@ jobs:
 
 
       - name: Run issue_classifier
+        id: issue_classifier
         run: |
-          python issue_classifier.py --issue_content "${{ github.event.issue.body }}" 
-
-
+          parsed_result, classificationResult = python issue_classifier.py --issue_content "${{ github.event.issue.body }}" 
+          echo "classificationResult=$classificationResult" >> "$GITHUB_OUTPUT"
         #   --issue_number ${{ github.event.issue.number }} \n
         #   --repo "${{ github.repository }}" \n
         #   --org "${{ github.repository_owner }}"
 
-    #   - name: Run issue_updater
-    #     run: |
-    #       python issue_updater.py --issue_number ${{ github.event.issue.number }}
-
-      - name: Assign the issue to copilot
-        if: github.event.issue.user.login != 'github-actions[bot]'
+      - name: Run issue_updater
+        id: issue_updater
         run: |
-            gh issue edit ${{ github.event.issue.number }} --add-assignee "@copilot"
+          python issue_updater.py --issue_number "${{ github.event.issue.number }}" \
+           --repo "${{ github.repository }}" --org "${{ github.repository_owner }}" \
+           --classification "${{ steps.issue_classifier.outputs.classificationResult }}"
 
-        #   gh api -X PATCH /repos/${{ github.repository }}/issues/${{ github.event.issue.number }} \
-        #   --field assignee="github-actions[bot]"
-        env:
-          GITHUB_TOKEN: ${{ secrets.HVE_Token }}
+    #   - name: Assign the issue to copilot
+    #     if: github.event.issue.user.login != 'github-actions[bot]'
+    #     run: |
+    #         gh issue edit ${{ github.event.issue.number }} --add-assignee "@copilot"
+    #     env:
+    #       GITHUB_TOKEN: ${{ secrets.HVE_Token }}
