@@ -38,10 +38,11 @@ jobs:
       - name: Run issue_classifier
         id: issue_classifier
         run: |
-          python issue_classifier.py --issue_content "${{ github.event.issue.body }}" \
+          classificationResult=$(python issue_classifier.py --issue_content "${{ github.event.issue.body }}" \
           --issue_number ${{ github.event.issue.number }} \
           --repo "${{ github.repository }}" \
-          --org "${{ github.repository_owner }}"
+          --org "${{ github.repository_owner }}")"
+
         #   echo "classificationResult=$classificationResult" >> "$GITHUB_OUTPUT"
 
     #   - name: Run issue_updater
