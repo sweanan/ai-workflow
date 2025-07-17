@@ -34,10 +34,12 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+
       - name: Run issue_classifier
         run: |
-          python issue_classifier.py --issue_content "${{ github.event.issue.body }}"  \
-          
+          python issue_classifier.py --issue_content "${{ github.event.issue.body }}" 
+
+
         #   --issue_number ${{ github.event.issue.number }} \n
         #   --repo "${{ github.repository }}" \n
         #   --org "${{ github.repository_owner }}"
@@ -45,3 +47,11 @@ jobs:
     #   - name: Run issue_updater
     #     run: |
     #       python issue_updater.py --issue_number ${{ github.event.issue.number }}
+
+      - name: Assign the issue to copilot
+        if: github.event.issue.user.login != 'github-actions[bot]'
+        run: |
+          gh api -X PATCH /repos/${{ github.repository }}/issues/${{ github.event.issue.number }} \
+          --field assignee="github-actions[bot]"
+        env:
+          GITHUB_TOKEN: ${{ secrets.HVE_Token }}
