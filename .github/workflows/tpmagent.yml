@@ -41,7 +41,7 @@ jobs:
           classificationResult=$(python issue_classifier.py --issue_content "${{ github.event.issue.body }}" \
           --issue_number ${{ github.event.issue.number }} \
           --repo "${{ github.repository }}" \
-          --org "${{ github.repository_owner }}")"
+          --org "${{ github.repository_owner }}")
 
         #   echo "classificationResult=$classificationResult" >> "$GITHUB_OUTPUT"
 
