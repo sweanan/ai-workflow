@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe Tests</title>
+</head>
+<body>
+    <h1>Tic Tac Toe Game Logic Tests</h1>
+    <div id="test-results"></div>
+
+    <script>
+        // Test suite for tic-tac-toe game logic
+        class TicTacToeTest {
+            constructor() {
+                this.testResults = [];
+                this.runAllTests();
+            }
+
+            // Win detection logic (extracted from main game)
+            checkWin(board) {
+                const winningCombinations = [
+                    // Rows
+                    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                    // Columns
+                    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                    // Diagonals
+                    [0, 4, 8], [2, 4, 6]
+                ];
+
+                return winningCombinations.some(combination => {
+                    const [a, b, c] = combination;
+                    return board[a] && board[a] === board[b] && board[a] === board[c];
+                });
+            }
+
+            // Draw detection logic (extracted from main game)
+            checkDraw(board) {
+                return board.every(cell => cell !== '') && !this.checkWin(board);
+            }
+
+            // Test horizontal win
+            testHorizontalWin() {
+                const board = ['X', 'X', 'X', '', '', '', '', '', ''];
+                const result = this.checkWin(board);
+                this.addTest('Horizontal Win (Top Row)', result === true);
+
+                const board2 = ['', '', '', 'O', 'O', 'O', '', '', ''];
+                const result2 = this.checkWin(board2);
+                this.addTest('Horizontal Win (Middle Row)', result2 === true);
+
+                const board3 = ['', '', '', '', '', '', 'X', 'X', 'X'];
+                const result3 = this.checkWin(board3);
+                this.addTest('Horizontal Win (Bottom Row)', result3 === true);
+            }
+
+            // Test vertical win
+            testVerticalWin() {
+                const board = ['X', '', '', 'X', '', '', 'X', '', ''];
+                const result = this.checkWin(board);
+                this.addTest('Vertical Win (Left Column)', result === true);
+
+                const board2 = ['', 'O', '', '', 'O', '', '', 'O', ''];
+                const result2 = this.checkWin(board2);
+                this.addTest('Vertical Win (Middle Column)', result2 === true);
+
+                const board3 = ['', '', 'X', '', '', 'X', '', '', 'X'];
+                const result3 = this.checkWin(board3);
+                this.addTest('Vertical Win (Right Column)', result3 === true);
+            }
+
+            // Test diagonal win
+            testDiagonalWin() {
+                const board = ['X', '', '', '', 'X', '', '', '', 'X'];
+                const result = this.checkWin(board);
+                this.addTest('Diagonal Win (Top-Left to Bottom-Right)', result === true);
+
+                const board2 = ['', '', 'O', '', 'O', '', 'O', '', ''];
+                const result2 = this.checkWin(board2);
+                this.addTest('Diagonal Win (Top-Right to Bottom-Left)', result2 === true);
+            }
+
+            // Test no win conditions
+            testNoWin() {
+                const board = ['X', 'O', 'X', 'O', 'X', 'O', 'O', 'X', 'O'];
+                const result = this.checkWin(board);
+                this.addTest('No Win (Full Board)', result === false);
+
+                const board2 = ['X', 'O', '', '', 'O', '', '', '', 'X'];
+                const result2 = this.checkWin(board2);
+                this.addTest('No Win (Incomplete Game)', result2 === false);
+            }
+
+            // Test draw condition
+            testDraw() {
+                const board = ['X', 'O', 'X', 'O', 'X', 'O', 'O', 'X', 'O'];
+                const result = this.checkDraw(board);
+                this.addTest('Draw Detection (Full Board, No Winner)', result === true);
+
+                const board2 = ['X', 'X', 'X', 'O', 'X', 'O', 'O', 'X', 'O'];
+                const result2 = this.checkDraw(board2);
+                this.addTest('Not Draw (Full Board, X Wins)', result2 === false);
+
+                const board3 = ['X', 'O', '', 'O', 'X', 'O', 'O', 'X', ''];
+                const result3 = this.checkDraw(board3);
+                this.addTest('Not Draw (Incomplete Game)', result3 === false);
+            }
+
+            addTest(name, passed) {
+                this.testResults.push({ name, passed });
+            }
+
+            runAllTests() {
+                this.testHorizontalWin();
+                this.testVerticalWin();
+                this.testDiagonalWin();
+                this.testNoWin();
+                this.testDraw();
+                this.displayResults();
+            }
+
+            displayResults() {
+                const resultsDiv = document.getElementById('test-results');
+                let html = '<h2>Test Results</h2>';
+                
+                const passedTests = this.testResults.filter(test => test.passed).length;
+                const totalTests = this.testResults.length;
+                
+                html += `<p><strong>Passed: ${passedTests}/${totalTests}</strong></p>`;
+                html += '<ul>';
+                
+                this.testResults.forEach(test => {
+                    const status = test.passed ? '✅ PASS' : '❌ FAIL';
+                    const color = test.passed ? 'green' : 'red';
+                    html += `<li style="color: ${color};">${status}: ${test.name}</li>`;
+                });
+                
+                html += '</ul>';
+                
+                if (passedTests === totalTests) {
+                    html += '<h3 style="color: green;">🎉 All tests passed! The game logic is working correctly.</h3>';
+                } else {
+                    html += '<h3 style="color: red;">❌ Some tests failed. Please review the implementation.</h3>';
+                }
+                
+                resultsDiv.innerHTML = html;
+            }
+        }
+
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new TicTacToeTest();
+        });
+    </script>
+</body>
+</html>
