@@ -51,7 +51,7 @@ jobs:
       - name: Assign the issue to copilot
         if: github.event.issue.user.login != 'github-actions[bot]'
         run: |
-            gh issue edit /repos/${{ github.repository }}/issues/${{ github.event.issue.number }} --add-assignee "@copilot"
+            gh issue edit ${{ github.event.issue.number }} --add-assignee "@copilot"
 
         #   gh api -X PATCH /repos/${{ github.repository }}/issues/${{ github.event.issue.number }} \
         #   --field assignee="github-actions[bot]"
