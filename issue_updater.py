@@ -35,7 +35,7 @@ def update_githubitem(workitem_id, org, repo, url, classification):
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
 
     # Check if the label 'BUG' is already set
-    get_response = requests.get(url, headers=headers)
+    get_response = requests.get(apiurl, headers=headers)
     if get_response.status_code == 200:
         # print("Existing issue found:")
         print("Existing issue found:", get_response.json())
