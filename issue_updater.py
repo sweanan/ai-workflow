@@ -25,6 +25,7 @@ def update_githubitem(workitem_id, org, repo, url, classification):
 
     # Construct the API URL
     # url = f"https://api.github.com/repos/{repo}/issues/{workitem_id}"
+    
 
     # Prepare the payload
     payload = {
@@ -36,11 +37,12 @@ def update_githubitem(workitem_id, org, repo, url, classification):
     # Check if the label 'BUG' is already set
     get_response = requests.get(url, headers=headers)
     if get_response.status_code == 200:
-        print("Existing issue found:", get_response.json())
-        existing_labels = [label['name'] for label in get_response.json().get('labels', [])]
-        if "BUG" in existing_labels:
-            print("Label 'BUG' is already set. No update needed.")
-            return get_response.json()
+        print("Existing issue found:")
+        # print("Existing issue found:", get_response.json())
+        # existing_labels = [label['name'] for label in get_response.json().get('labels', [])]
+        # if "BUG" in existing_labels:
+        #     print("Label 'BUG' is already set. No update needed.")
+        #     return get_response.json()
 
     # Make the PATCH request to update the issue if 'BUG' label is not set
     response = requests.patch(url, json=payload, headers=headers)
