@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import argparse
 
 
-def update_githubitem(workitem_id, org, repo, classification):
+def update_githubitem(workitem_id, org, repo, url, classification):
     """
     Update a GitHub work item with its classification.
 
@@ -87,6 +87,12 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--url",
+        help="URL of the issue",
+        type=str,
+    )
+
+    parser.add_argument(
         "--classification",
         help="Classification of the issue (e.g., Bug, Story, Feature)",
         type=str,
@@ -98,6 +104,6 @@ def parse_args() -> argparse.Namespace:
 if __name__ == "__main__":
     args = parse_args()
 
-    update_response = update_githubitem(args.issue_number, args.org, args.repo, args.classification)
+    update_response = update_githubitem(args.issue_number, args.org, args.repo, args.url, args.classification)
 
     print("Update Response:", update_response)

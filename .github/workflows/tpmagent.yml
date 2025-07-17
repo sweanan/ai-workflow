@@ -49,6 +49,7 @@ jobs:
         run: |
           python issue_updater.py --issue_number "${{ github.event.issue.number }}" \
            --repo "${{ github.repository }}" --org "${{ github.repository_owner }}" \
+           --url="${{ github.event.issue.html_url }}" \
            --classification "${{ steps.issue_classifier.outputs.classificationResult }}"
 
     #   - name: Assign the issue to copilot
